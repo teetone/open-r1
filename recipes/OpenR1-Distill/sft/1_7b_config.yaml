@@ -1,5 +1,5 @@
-# Config for 1 x H200 (single node / single GPU)
-# Base model: Qwen/Qwen3-1.7B-Base (native max_position_embeddings = 32768) :contentReference[oaicite:1]{index=1}
+# Config for single GPU (e.g., 1 x H200) SFT
+# Base model: Qwen/Qwen3-1.7B-Base (32K native context)
 
 # Model arguments
 model_name_or_path: Qwen/Qwen3-1.7B-Base
@@ -18,37 +18,52 @@ eos_token: <|im_end|>
 bf16: true
 do_eval: false
 eval_strategy: "no"
-gradient_accumulation_steps: 8
+per_device_train_batch_size: 2
+
+# IMPORTANT:
+# OpenR1-Distill-7B used total_train_batch_size=128 via (2 * 8 gpus * grad_accum 8).
+# On 1 GPU, matching total_train_batch_size=128 requires grad_accum 64 (2 * 1 * 64 = 128).
+gradient_accumulation_steps: 64
+
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
 
+# Learning rate
+learning_rate: 4.0e-05
+
 hub_model_id: OpenR1-Distill-Qwen3-1.7B
 hub_strategy: every_save
-learning_rate: 4.0e-05
+
 log_level: info
 logging_steps: 1
 logging_strategy: steps
+
 lr_scheduler_type: cosine_with_min_lr
 lr_scheduler_kwargs:
   min_lr_rate: 0.1
+
 packing: false
 max_grad_norm: 0.2
 
-# 32K sequence length (matches model's native max_position_embeddings) :contentReference[oaicite:2]{index=2}
+# 32K context (matches Qwen3-1.7B-Base max_position_embeddings=32768)
 max_length: 32768
 
 max_steps: -1
 num_train_epochs: 5
+
 output_dir: data/OpenR1-Distill-Qwen3-1.7B
 overwrite_output_dir: true
+
 per_device_eval_batch_size: 1
-per_device_train_batch_size: 2
 push_to_hub: true
+
 report_to:
   - wandb
+
 save_strategy: epoch
 save_total_limit: 1
 seed: 42
+
 use_liger_kernel: true
 warmup_ratio: 0.03
