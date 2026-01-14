@@ -18,6 +18,7 @@ import argparse
 from typing import Iterable, List
 
 from transformers import AutoModelForCausalLM
+import torch
 
 from lighteval.logging.evaluation_tracker import EvaluationTracker
 from lighteval.models.transformers.transformers_model import (
@@ -53,7 +54,9 @@ def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_s
         max_samples=max_samples,
     )
 
-    base_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+    base_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", torch_dtype=torch.bfloat16)
+    base_model.config.use_cache = True
+    base_model.generation_config.use_cache = True
     config = TransformersModelConfig(model_name=model_name, batch_size=1)
     wrapped_model = TransformersModel.from_model(base_model, config)
 
