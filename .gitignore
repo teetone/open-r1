@@ -176,6 +176,9 @@ wandb/
 logs/
 eval_results/
 results/
+cache/
 
 .vscode/
 .python-version
+
+.DS_Store
