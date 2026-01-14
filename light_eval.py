@@ -33,7 +33,7 @@ DEFAULT_MODEL_NAMES: List[str] = [
 ]
 
 # Tasks follow LightEval naming; adjust if your install uses different aliases.
-DEFAULT_TASKS: List[str] = ["MATH500", "AIME24"]
+DEFAULT_TASKS: List[str] = ["math_500", "aime24"]
 
 
 def _normalize_tasks(tasks: Iterable[str]) -> str:
