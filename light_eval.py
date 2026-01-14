@@ -65,7 +65,6 @@ def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_s
         device="cuda",
         use_chat_template=True,  # often needed for instruct/thinking models
         generation_parameters=GenerationParameters(
-            temperature=0.0,      # greedy
             max_new_tokens=512,   # start small; increase later if needed
         ),
     )
