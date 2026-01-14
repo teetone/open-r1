@@ -21,6 +21,7 @@ from transformers import AutoModelForCausalLM
 import torch
 
 from lighteval.logging.evaluation_tracker import EvaluationTracker
+from lighteval.models.model_input import GenerationParameters
 from lighteval.models.transformers.transformers_model import (
     TransformersModel,
     TransformersModelConfig,
@@ -54,10 +55,20 @@ def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_s
         max_samples=max_samples,
     )
 
-    base_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", torch_dtype=torch.bfloat16)
+    base_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda:0", torch_dtype=torch.bfloat16)
     base_model.config.use_cache = True
     base_model.generation_config.use_cache = True
-    config = TransformersModelConfig(model_name=model_name, batch_size=1)
+    config = TransformersModelConfig(
+        model_name=model_name,
+        batch_size=1,
+        dtype="bfloat16",
+        device="cuda",
+        use_chat_template=True,  # often needed for instruct/thinking models
+        generation_parameters=GenerationParameters(
+            temperature=0.0,      # greedy
+            max_new_tokens=512,   # start small; increase later if needed
+        ),
+    )
     wrapped_model = TransformersModel.from_model(base_model, config)
 
     return Pipeline(
@@ -83,7 +94,8 @@ def main() -> None:
 
     for model_name in args.models:
         print(f"\n=== Evaluating {model_name} on {args.tasks} ===")
-        pipeline = build_pipeline(model_name, args.tasks, args.output_dir, args.max_samples)
+        model_out = f"{args.output_dir}/{model_name.replace('/', '__')}"
+        pipeline = build_pipeline(model_name, args.tasks, model_out, args.max_samples)
         results = pipeline.evaluate()
         pipeline.show_results()
         # Optionally use results programmatically
