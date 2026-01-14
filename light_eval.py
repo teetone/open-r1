@@ -28,8 +28,8 @@ from lighteval.pipeline import ParallelismManager, Pipeline, PipelineParameters
 
 
 DEFAULT_MODEL_NAMES: List[str] = [
-    "teetone/OpenR1-Distill-Qwen3-1.7B-Math",
     "Qwen/Qwen3-4B-Thinking-2507",
+    "teetone/OpenR1-Distill-Qwen3-1.7B-Math",
 ]
 
 # Tasks follow LightEval naming; adjust if your install uses different aliases.
