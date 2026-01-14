@@ -36,6 +36,16 @@ DEFAULT_MODEL_NAMES: List[str] = [
 DEFAULT_TASKS: List[str] = ["MATH500", "AIME24"]
 
 
+def _normalize_tasks(tasks: Iterable[str]) -> str:
+    """
+    LightEval expects a comma-separated string of task names.
+    Accept list/tuple and convert, or passthrough string.
+    """
+    if isinstance(tasks, str):
+        return tasks
+    return ",".join(tasks)
+
+
 def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_samples: int) -> Pipeline:
     evaluation_tracker = EvaluationTracker(output_dir=output_dir)
     pipeline_params = PipelineParameters(
@@ -51,16 +61,21 @@ def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_s
         model=wrapped_model,
         pipeline_parameters=pipeline_params,
         evaluation_tracker=evaluation_tracker,
-        tasks=list(tasks),
+        tasks=_normalize_tasks(tasks),
     )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run LightEval on math benchmarks.")
     parser.add_argument("--models", nargs="+", default=DEFAULT_MODEL_NAMES, help="Model names to evaluate")
-    parser.add_argument("--tasks", nargs="+", default=DEFAULT_TASKS, help="LightEval task names")
+    parser.add_argument(
+        "--tasks",
+        nargs="+",
+        default=DEFAULT_TASKS,
+        help="LightEval task names (space- or comma-separated; will be joined with commas)",
+    )
     parser.add_argument("--output_dir", default="./results", help="Directory to store evaluation outputs")
-    parser.add_argument("--max_samples", type=int, default=100, help="Max samples per task (LightEval cap)")
+    parser.add_argument("--max_samples", type=int, default=1000, help="Max samples per task (LightEval cap)")
     args = parser.parse_args()
 
     for model_name in args.models:
