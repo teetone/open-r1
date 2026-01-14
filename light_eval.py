@@ -30,8 +30,8 @@ from lighteval.pipeline import ParallelismManager, Pipeline, PipelineParameters
 
 
 DEFAULT_MODEL_NAMES: List[str] = [
-    "Qwen/Qwen3-4B-Thinking-2507",
     "teetone/OpenR1-Distill-Qwen3-1.7B-Math",
+    # "Qwen/Qwen3-4B-Thinking-2507",
 ]
 
 # Tasks follow LightEval naming; adjust if your install uses different aliases.
@@ -55,7 +55,7 @@ def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_s
         max_samples=max_samples,
     )
 
-    base_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda:0", torch_dtype=torch.bfloat16)
+    base_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda:0", torch_dtype=torch.bfloat16, force_download=True)
     base_model.config.use_cache = True
     base_model.generation_config.use_cache = True
     config = TransformersModelConfig(
