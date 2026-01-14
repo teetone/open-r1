@@ -32,18 +32,32 @@ DEFAULT_MODEL_NAMES: List[str] = [
     "Qwen/Qwen3-4B-Thinking-2507",
 ]
 
-# Tasks follow LightEval naming; adjust if your install uses different aliases.
+# LightEval expects suite|task|few_shot|truncate_few_shots
+TASK_ALIASES = {
+    "math_500": "math|math_500|0|0",
+    "MATH500": "math|math_500|0|0",
+    "aime24": "aime|aime24|0|0",
+    "AIME24": "aime|aime24|0|0",
+}
+
+# Defaults use the aliases above; they will be expanded.
 DEFAULT_TASKS: List[str] = ["math_500", "aime24"]
 
 
 def _normalize_tasks(tasks: Iterable[str]) -> str:
     """
-    LightEval expects a comma-separated string of task names.
-    Accept list/tuple and convert, or passthrough string.
+    LightEval expects a comma-separated string of suite|task|few_shot|truncate_few_shots.
+    Accept list/tuple and convert, applying aliases for common shorthand names.
     """
     if isinstance(tasks, str):
-        return tasks
-    return ",".join(tasks)
+        parts = [t.strip() for t in tasks.split(",") if t.strip()]
+    else:
+        parts = [t.strip() for t in tasks if t and t.strip()]
+
+    normalized = []
+    for t in parts:
+        normalized.append(TASK_ALIASES.get(t, t))
+    return ",".join(normalized)
 
 
 def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_samples: int) -> Pipeline:
