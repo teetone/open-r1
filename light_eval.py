@@ -63,10 +63,8 @@ def build_pipeline(model_name: str, tasks: Iterable[str], output_dir: str, max_s
         batch_size=1,
         dtype="bfloat16",
         device="cuda",
-        use_chat_template=True,  # often needed for instruct/thinking models
-        generation_parameters=GenerationParameters(
-            max_new_tokens=512,   # start small; increase later if needed
-        ),
+        use_chat_template=True,
+        generation_parameters=GenerationParameters(max_new_tokens=32768),
     )
     wrapped_model = TransformersModel.from_model(base_model, config)
 
